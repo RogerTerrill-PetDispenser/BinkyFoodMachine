@@ -56,6 +56,7 @@ RTCDateTime t;
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 const int button1Pin = 6;         // pushbutton 1 pin
+const int button2Pin = 7;         // pushbutton 2 pin for correction
 const int ledPin = 13;            // LED pin
 const int motorPin = 10;          // Motor Pin
 unsigned long buttonPushedMillis; // when button was released
@@ -63,8 +64,10 @@ unsigned long autoMillis;         // when the auto feed last ran
 bool manualFeed = false;
 bool ledOn = false;
 bool buttonPushed = false;
+bool button2Pushed = false;
 bool autoFeed = false;
-const int durMilli = 8050;
+const int durMilli = 8100;
+const int CorrectionMilli = 100;
 
 void setup()
 {
@@ -75,7 +78,7 @@ void setup()
     rtc.begin();
 
     // Manual (YYYY, MM, DD, HH, II, SS uncomment to set date
-    // rtc.setDateTime(2016, 12, 16, 00, 01, 00);
+    //rtc.setDateTime(2018, 04, 29, 20, 15, 00);
 
     // set up the LCD's number of columns and rows:
     lcd.begin(16, 2);
@@ -131,6 +134,7 @@ void loop()
 
     // variables to hold the pushbutton states
     int button1State = digitalRead(button1Pin);
+    int button2State = digitalRead(button2Pin);
   /*if(millis() % 1000 >= 0 && manualFeed == true)
   {
     Serial.println("manualFeed == true");
@@ -139,8 +143,25 @@ void loop()
   {
     Serial.println("manualFeed == false");
   }*/
+
+  //Correction Button
   
-    if(button1State == LOW) 
+  if(button2State == LOW) 
+  {
+    button2Pushed = true;
+    buttonPushedMillis = millis();
+    digitalWrite(ledPin, HIGH);
+    feed();
+  }
+    if(buttonPushedMillis + CorrectionMilli < millis() && button2Pushed == true)
+    {
+      digitalWrite(ledPin, LOW);
+      digitalWrite(motorPin, LOW);
+      button2Pushed = false;
+    }
+
+  //Manual Feed Button
+  if(button1State == LOW) 
   {
     //song();
     buttonPushedMillis = millis();
